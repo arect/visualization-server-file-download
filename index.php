@@ -52,7 +52,7 @@
                     $arrlength=count($arr);
                     for($x = 0; $x < $arrlength; $x++) {
                         if ($arr[$x] != "index.php"){
-                            echo "<button class=\"mdui-btn mdui-btn-block mdui-color-theme-accent mdui-ripple mdui-text-left\" onclick=\"window.open('https://www.inspire2030.cn/download/";
+                            echo "<button class=\"mdui-btn mdui-btn-block mdui-color-theme-accent mdui-ripple mdui-text-left\" onclick=\"window.open('本地目录/";
                             $type = pathinfo($arr[$x], PATHINFO_EXTENSION);
                             echo $arr[$x];
                             echo "')\">";
