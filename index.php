@@ -37,43 +37,63 @@
                 <hr/>
             </div>
             <?php
-                $path = "./";
-                if (!is_dir($path)){
-                    echo "ERROR";
-                }
-                else {
-                    $arr = array();
-                    $data = scandir($path);
-                    foreach ($data as $value){
-                        if($value != '.' && $value != '..'){
-                            $arr[] = $value;
-                        }
+                function returnFileType($suffix){
+                    if (strcasecmp($suffix, "webp") == 0 || strcasecmp($suffix, "gif") == 0 || strcasecmp($suffix, "jpg") == 0 || strcasecmp($suffix, "svg") == 0 || strcasecmp($suffix, "png") == 0 || strcasecmp($suffix, "raw") == 0 || strcasecmp($suffix, "ico") == 0){
+                        return "image";
+                    }elseif (strcasecmp($suffix, "mp3") == 0 || strcasecmp($suffix, "wmv") == 0 || strcasecmp($suffix, "flac") == 0 || strcasecmp($suffix, "aac") == 0) {
+                        return "music_note";
+                    }elseif (strcasecmp($suffix, "mp4") == 0 || strcasecmp($suffix, "avi") == 0 || strcasecmp($suffix, "mov") == 0 || strcasecmp($suffix, "wmv") == 0 || strcasecmp($suffix, "flv") == 0 || strcasecmp($suffix, "mkv") == 0) {
+                        return "videocam";
+                    }elseif (strcasecmp($suffix, "zip") == 0 || strcasecmp($suffix, "7z") == 0 || strcasecmp($suffix, "rar") == 0 || strcasecmp($suffix, "tar") == 0) {
+                        return "archive";
+                    }elseif (strcasecmp($suffix, "pdf") == 0) {
+                        return "picture_as_pdf";
+                    }else{
+                        return "insert_drive_file";
                     }
-                    $arrlength=count($arr);
-                    for($x = 0; $x < $arrlength; $x++) {
-                        if ($arr[$x] != "index.php"){
-                            echo "<button class=\"mdui-btn mdui-btn-block mdui-color-theme-accent mdui-ripple mdui-text-left\" onclick=\"window.open('本地目录/";
-                            $type = pathinfo($arr[$x], PATHINFO_EXTENSION);
-                            echo $arr[$x];
-                            echo "')\">";
-                            if (strcasecmp($type, "webp") == 0 || strcasecmp($type, "gif") == 0 || strcasecmp($type, "jpg") == 0 || strcasecmp($type, "svg") == 0 || strcasecmp($type, "png") == 0 || strcasecmp($type, "raw") == 0 || strcasecmp($type, "ico") == 0){
-                                echo "<i class=\"mdui-icon material-icons\">image</i>";
-                            }elseif (strcasecmp($type, "mp3") == 0 || strcasecmp($type, "wmv") == 0 || strcasecmp($type, "flac") == 0 || strcasecmp($type, "aac") == 0) {
-                                echo "<i class=\"mdui-icon material-icons\">music_note</i>";
-                            }elseif (strcasecmp($type, "mp4") == 0 || strcasecmp($type, "avi") == 0 || strcasecmp($type, "mov") == 0 || strcasecmp($type, "wmv") == 0 || strcasecmp($type, "flv") == 0 || strcasecmp($type, "mkv") == 0) {
-                                echo "<i class=\"mdui-icon material-icons\">videocam</i>";
-                            }else{
-                                echo "<i class=\"mdui-icon material-icons\">insert_drive_file</i>";
+                }
+                function outputFile($dirPath){
+                    $url = substr($_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'], 0, -10);
+                    $url .= substr($dirPath, 2)."/";
+                    if(!is_dir($dirPath)){
+                        return;
+                    }else{
+                        $fileList = array();
+                        $fileData = scandir($dirPath);
+                        foreach($fileData as $value){
+                            if($value != '.' && $value != '..'){
+                                if($value != "index.php"){
+                                    $flieList[] = $value;
+                                }
                             }
-                            echo $arr[$x];
-                            echo "</button>";
+                        }
+                        if(empty($flieList) == true){
+                            echo "&emsp;&ensp;空文件夹";
+                            return;
+                        }
+                        foreach($flieList as $value){
+                            if($value == ".hidden"){
+                                echo "&emsp;&ensp;空文件夹";
+                                return;
+                            }
+                        }
+                        foreach($flieList as $value){
+                            if(!is_dir($dirPath.'/'.$value)){
+                                echo "<button class=\"mdui-btn mdui-btn-block mdui-color-theme-accent mdui-ripple mdui-text-left\" onclick=\"window.open('http://".$url.$value."')\">";
+                                    echo "&ensp;<i class=\"mdui-icon material-icons\">".returnFileType(pathinfo($value, PATHINFO_EXTENSION))."</i>&ensp;";
+                                echo $value;
+                                echo "</button>";
+                            }else{
+                                echo "<div class=\"mdui-panel mdui-panel-gapless mdui-shadow-0\" mdui-panel>"."<div class=\"mdui-panel-item mdui-shadow-0\">";
+                                echo "<div class=\"mdui-panel-item-header\"><i class=\"mdui-icon material-icons\">folder</i>&ensp;".$value."</div>";
+                                echo "<div class=\"mdui-panel-item-body\">";
+                                outputFile($dirPath.'/'.$value);
+                                echo "</div></div></div>";
+                            }
                         }
                     }
-                    if ($arrlength == 1){
-                        echo "<button class=\"mdui-btn mdui-btn-block mdui-color-theme-accent mdui-ripple mdui-text-left\">空</button>";
-                    }
                 }
-    
+                outputFile("./");
             ?>
         </div>
     </body>
