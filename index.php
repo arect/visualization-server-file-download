@@ -99,7 +99,7 @@
                             return;
                         }
                         if($status == 2){
-                            echo "&emsp;&ensp;空文件夹2";
+                            echo "&emsp;&ensp;空文件夹";
                             return;
                         }
                         if(empty($flieList) == true){
