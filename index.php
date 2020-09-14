@@ -17,6 +17,30 @@
                 width: 100%;
                 height: 20px;
             }
+            .mdui-panel-item-body::before{
+                height: 4px;
+            }
+            .mdui-panel-item-body::after{
+                height: 4px;
+            }
+            .mdui-textfield{
+                padding: 0;
+            }
+            .mdui-textfield-focus{
+                padding: 0;
+            }
+            a{
+                text-decoration: none;
+            }
+            a:link{
+                color: #333333;
+            }
+            a:visited{
+                color: #333333;
+            }
+            a:hover{
+                color: #222222;
+            }
         </style>
         <title>下载</title>
     </head>
@@ -42,6 +66,7 @@
             <div class="mdui-typo">
                 <hr/>
             </div>
+            <div class="empty"></div>
             <?php
                 function returnFileType($suffix){
                     if (strcasecmp($suffix, "webp") == 0 || strcasecmp($suffix, "gif") == 0 || strcasecmp($suffix, "jpg") == 0 || strcasecmp($suffix, "svg") == 0 || strcasecmp($suffix, "png") == 0 || strcasecmp($suffix, "raw") == 0 || strcasecmp($suffix, "ico") == 0){
@@ -60,72 +85,61 @@
                 }
                 function outputFile($dirPath){
                     $url = substr($_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'], 0, -10);
-                    $url .= substr($dirPath, 2)."/";
+                    $url .= substr($dirPath, 1);
                     if(!is_dir($dirPath)){
                         return;
                     }else{
                         $status = 0;
-                        $psw = "";
                         $fileList = array();
+                        $dirList = array();
                         $fileData = scandir($dirPath);
                         foreach($fileData as $value){
                             if($value != '.' && $value != '..'){
                                 if($value == ".hidden"){
-                                    $status = 2;
+                                    $status = 1;
                                     break;
                                 }
-                                if(substr($value, 0, 9) == ".password"){
-                                    $psw = substr($value, 10);
-                                    $status = 1;
+                                if($value != "index.php"){
+                                    if(is_dir($dirPath.$value)){
+                                        $dirList[] = $value;
+                                    }else{
+                                        $fileList[] = $value;
+                                    }
                                 }
-                                if($value != "index.php" && substr($value, 0, 9) != ".password"){
-                                    $flieList[] = $value;
-                                }
                             }
                         }
-                        if($status == 1 && $_POST["password"] != $psw){
-                            echo "<form action=\"index.php?folder=".$dirPath."\" method=\"post\">";
-                            echo "<div class=\"mdui-textfield mdui-textfield-floating-label\" style=\"padding:0\">";
-                            if($_POST["password"] != ""){
-                                echo "<i class=\"mdui-icon material-icons\" style=\"margin:0;padding:0;color:red;\">lock</i>";
+                        if($status == 1){
+                            echo "&emsp;&ensp;&ensp;空文件夹";
+                            return;
+                        }
+                        if(empty($fileList) == true && empty($dirList) == true){
+                            echo "&emsp;&ensp;&ensp;空文件夹";
+                            return;
+                        }
+                        if(empty($dirList) == false){
+                            foreach($dirList as $value){
+                                echo "<div class=\"mdui-panel mdui-panel-gapless mdui-shadow-0\" mdui-panel>"."<div class=\"mdui-panel-item mdui-shadow-0\">";
+                                echo "<div class=\"mdui-panel-item-header\" style=\"height: 36px;\"><i class=\"mdui-icon material-icons\">folder</i>&ensp;".$value."</div>";
+                                echo "<div class=\"mdui-panel-item-body\">";
+                                outputFile($dirPath.$value."/");
+                                echo "</div></div></div>";
                             }
-                            else{
-                                echo "<i class=\"mdui-icon material-icons\" style=\"margin:0;padding:0\">lock</i>";
-                            }
-                            echo "<label class=\"mdui-textfield-label\">密码</label>";
-                            echo "<input class=\"mdui-textfield-input\" type=\"password\" name=\"password\"/>";
-                            echo "</div>";
-                            echo "</from>";
-                            return;
                         }
-                        if($status == 2){
-                            echo "&emsp;&ensp;空文件夹";
-                            return;
-                        }
-                        if(empty($flieList) == true){
-                            echo "&emsp;&ensp;空文件夹";
-                            return;
-                        }
-                        foreach($flieList as $value){
-                            if(!is_dir($dirPath.'/'.$value)){
-                                echo "<button class=\"mdui-btn mdui-btn-block mdui-color-theme-accent mdui-ripple mdui-text-left\" onclick=\"window.open('http://".$url.$value."')\">";
+                        if(empty($fileList) == false){
+                            foreach($fileList as $value){
+                                echo "<a href=\"".$dirPath.$value."\"><button class=\"mdui-btn mdui-btn-block mdui-color-theme-accent mdui-ripple mdui-text-left\">";
                                 echo "&ensp;<i class=\"mdui-icon material-icons\">".returnFileType(pathinfo($value, PATHINFO_EXTENSION))."</i>&ensp;";
                                 echo $value;
-                                echo "</button>";
-                            }else{
-                                echo "<div class=\"mdui-panel mdui-panel-gapless mdui-shadow-0\" mdui-panel>"."<div class=\"mdui-panel-item mdui-shadow-0\">";
-                                echo "<div class=\"mdui-panel-item-header\"><i class=\"mdui-icon material-icons\">folder</i>&ensp;".$value."</div>";
-                                echo "<div class=\"mdui-panel-item-body\">";
-                                outputFile($dirPath.$value);
-                                echo "</div></div></div>";
+                                echo "</button></a>";
                             }
                         }
                     }
                 }
                 $target = $_GET["folder"];
                 if($target == ""){
-                    $target = "./";
+                    $target = ".";
                 }
+                $target .= "/";
                 outputFile($target);
             ?>
         </div>
